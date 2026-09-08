@@ -35,7 +35,7 @@ resource "azurerm_resource_group" "commerce" {
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.commerce.name
-  location            = azurerm_resource_group.commerce.location
+  location            = var.workload_location
   sku                 = var.acr_sku
   admin_enabled       = var.acr_admin_enabled
   tags                = local.common_tags
@@ -44,7 +44,7 @@ resource "azurerm_container_registry" "acr" {
 resource "azurerm_log_analytics_workspace" "container_apps" {
   name                = var.log_analytics_workspace_name
   resource_group_name = azurerm_resource_group.commerce.name
-  location            = azurerm_resource_group.commerce.location
+  location            = var.workload_location
   sku                 = "PerGB2018"
   retention_in_days   = 30
   tags                = local.common_tags
@@ -53,7 +53,7 @@ resource "azurerm_log_analytics_workspace" "container_apps" {
 resource "azurerm_container_app_environment" "shared" {
   name                       = var.container_apps_environment_name
   resource_group_name        = azurerm_resource_group.commerce.name
-  location                   = azurerm_resource_group.commerce.location
+  location                   = var.workload_location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.container_apps.id
   tags                       = local.common_tags
 }
@@ -61,7 +61,7 @@ resource "azurerm_container_app_environment" "shared" {
 resource "azurerm_user_assigned_identity" "container_apps_acr_pull" {
   name                = var.container_apps_identity_name
   resource_group_name = azurerm_resource_group.commerce.name
-  location            = azurerm_resource_group.commerce.location
+  location            = var.workload_location
   tags                = local.common_tags
 }
 
@@ -75,7 +75,7 @@ resource "azurerm_role_assignment" "acr_pull" {
 resource "azurerm_postgresql_flexible_server" "postgres" {
   name                          = var.postgres_server_name
   resource_group_name           = azurerm_resource_group.commerce.name
-  location                      = azurerm_resource_group.commerce.location
+  location                      = var.workload_location
   version                       = var.postgres_version
   administrator_login           = var.postgres_admin_username
   administrator_password        = var.postgres_admin_password
