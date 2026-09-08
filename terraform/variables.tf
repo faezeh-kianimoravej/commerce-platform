@@ -11,7 +11,13 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "Azure region for the dev environment."
+  description = "Azure region of the existing resource group."
+  type        = string
+  default     = "West Europe"
+}
+
+variable "workload_location" {
+  description = "Azure region for resources inside the resource group, such as Container Apps and PostgreSQL."
   type        = string
   default     = "North Europe"
 }

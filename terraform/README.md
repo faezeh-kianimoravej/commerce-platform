@@ -27,6 +27,8 @@ Current services:
 
 The dev PostgreSQL setup uses public access and an `AllowAzureServices` firewall rule so Azure-hosted services can connect. For production, prefer private networking with VNet integration, private DNS, and restricted database firewall rules.
 
+The existing resource group is in `West Europe`. Resources inside that group can still be deployed to another Azure region; this dev configuration keeps workload resources in `North Europe` via `workload_location`.
+
 ## Directory Structure
 
 ```text
@@ -144,6 +146,8 @@ Terraform state can contain sensitive values such as Container App secrets. Loca
 Important variables:
 
 - `subscription_id`
+- `location`, the existing resource group region
+- `workload_location`, the region for resources inside the resource group
 - `postgres_server_name`
 - `postgres_admin_username`
 - `postgres_admin_password`

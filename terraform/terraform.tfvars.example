@@ -4,7 +4,8 @@
 # subscription_id = "00000000-0000-0000-0000-000000000000"
 
 resource_group_name = "rg-commerce-dev"
-location            = "North Europe"
+location            = "West Europe"
+workload_location   = "North Europe"
 environment         = "dev"
 
 acr_name          = "acrcommerceplatformdev"
