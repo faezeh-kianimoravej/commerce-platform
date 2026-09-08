@@ -172,6 +172,28 @@ terraform destroy
 
 Be careful with `terraform destroy`: it deletes resources tracked in state, including databases and Container Apps.
 
+## Azure Resource Providers
+
+The AzureRM provider has automatic resource provider registration disabled:
+
+```hcl
+resource_provider_registrations = "none"
+```
+
+This is intentional because the GitHub Actions identity follows least-privilege permissions. It should manage only the commerce infrastructure it needs, not register arbitrary Azure providers at the subscription level.
+
+The required Azure Resource Providers must already be registered in the subscription before Terraform runs. For the resources in this repository, the expected providers are:
+
+- `Microsoft.Resources`
+- `Microsoft.ContainerRegistry`
+- `Microsoft.OperationalInsights`
+- `Microsoft.App`
+- `Microsoft.ManagedIdentity`
+- `Microsoft.Authorization`
+- `Microsoft.DBforPostgreSQL`
+
+Do not broaden the GitHub Actions identity just to grant `*/register/action`. Ask a subscription owner or platform administrator to register only the required providers ahead of time.
+
 ## Import Existing Azure Resources First
 
 Some Azure resources already exist. Import them into Terraform state before the first `terraform apply`; otherwise Terraform will try to create resources with the same names.

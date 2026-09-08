@@ -13,5 +13,6 @@ provider "azurerm" {
   features {}
 
   # Leave null to use Azure CLI, ARM_SUBSCRIPTION_ID, or your CI identity.
-  subscription_id = var.subscription_id
+  subscription_id                 = var.subscription_id
+  resource_provider_registrations = "none"
 }
