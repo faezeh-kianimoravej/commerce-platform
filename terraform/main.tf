@@ -5,23 +5,31 @@ locals {
     project     = "commerce-platform"
   })
 
-  database_services = {
+  active_database_services = {
     for service_key, service in var.services : service_key => service
     if service.database_name != null
   }
 
+  managed_database_names = merge(
+    {
+      for service_key, service in local.active_database_services :
+      service_key => service.database_name
+    },
+    var.retained_database_names
+  )
+
   database_urls = {
-    for service_key, service in local.database_services :
+    for service_key, service in local.active_database_services :
     service_key => "jdbc:postgresql://${azurerm_postgresql_flexible_server.postgres.fqdn}:5432/${service.database_name}?sslmode=require"
   }
 
   database_usernames = {
-    for service_key, service in local.database_services :
+    for service_key, service in local.active_database_services :
     service_key => lookup(var.database_usernames, service_key, var.postgres_admin_username)
   }
 
   database_passwords = {
-    for service_key, service in local.database_services :
+    for service_key, service in local.active_database_services :
     service_key => lookup(var.database_passwords, service_key, var.postgres_admin_password)
   }
 }
@@ -97,9 +105,9 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_service
 }
 
 resource "azurerm_postgresql_flexible_server_database" "service_databases" {
-  for_each = local.database_services
+  for_each = local.managed_database_names
 
-  name      = each.value.database_name
+  name      = each.value
   server_id = azurerm_postgresql_flexible_server.postgres.id
   charset   = "utf8"
   collation = "en_US.utf8"

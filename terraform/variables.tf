@@ -107,6 +107,14 @@ variable "database_passwords" {
   default     = {}
 }
 
+variable "retained_database_names" {
+  description = "Logical databases to keep managed while their services are temporarily inactive."
+  type        = map(string)
+  default = {
+    order = "order_db"
+  }
+}
+
 variable "service_secrets" {
   description = "Optional Container App secret values keyed by service key, then secret name."
   type        = map(map(string))
@@ -139,24 +147,6 @@ variable "services" {
       target_port      = 8080
       external_ingress = true
       database_name    = "product_db"
-    }
-
-    order = {
-      app_name         = "commerce-order-service-dev"
-      image_repository = "commerce-order-service"
-      image_tag        = "latest"
-      target_port      = 8080
-      external_ingress = false
-      database_name    = "order_db"
-    }
-
-    gateway = {
-      app_name         = "commerce-api-gateway-dev"
-      image_repository = "commerce-api-gateway"
-      image_tag        = "latest"
-      target_port      = 8080
-      external_ingress = true
-      database_name    = null
     }
   }
 }
