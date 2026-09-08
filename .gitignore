@@ -1,0 +1,10 @@
+# Terraform local state and secret variable files
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+tfplan
+*.tfplan
+*.tfvars
+!*.tfvars.example
