@@ -49,13 +49,13 @@ variable "acr_admin_enabled" {
 variable "log_analytics_workspace_name" {
   description = "Log Analytics Workspace used by Azure Container Apps Environment."
   type        = string
-  default     = "law-commerce-dev"
+  default     = "workspacergcommercedev9827container_apps_environment_name"
 }
 
 variable "container_apps_environment_name" {
   description = "Shared Azure Container Apps Environment name."
   type        = string
-  default     = "cae-commerce-dev"
+  default     = "managedEnvironment-rgcommercedev-a0e2"
 }
 
 variable "container_apps_identity_name" {
@@ -67,7 +67,7 @@ variable "container_apps_identity_name" {
 variable "postgres_server_name" {
   description = "Azure Database for PostgreSQL Flexible Server name. Set this to the existing server name before import."
   type        = string
-  default     = "psql-commerce-dev"
+  default     = "commerce-product-db-dev"
 }
 
 variable "postgres_version" {
