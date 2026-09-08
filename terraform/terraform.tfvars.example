@@ -11,12 +11,12 @@ acr_name          = "acrcommerceplatformdev"
 acr_sku           = "Basic"
 acr_admin_enabled = false
 
-log_analytics_workspace_name    = "law-commerce-dev"
-container_apps_environment_name = "cae-commerce-dev"
+log_analytics_workspace_name    = "workspacergcommercedev9827"
+container_apps_environment_name = "managedEnvironment-rgcommercedev-a0e2"
 container_apps_identity_name    = "id-commerce-containerapps-acrpull-dev"
 
 # Set this to the actual existing PostgreSQL Flexible Server name before import/apply.
-postgres_server_name    = "psql-commerce-dev"
+postgres_server_name    = "commerce-product-db-dev"
 postgres_version        = "16"
 postgres_admin_username = "commerceadmin"
 

@@ -49,7 +49,7 @@ variable "acr_admin_enabled" {
 variable "log_analytics_workspace_name" {
   description = "Log Analytics Workspace used by Azure Container Apps Environment."
   type        = string
-  default     = "workspacergcommercedev9827container_apps_environment_name"
+  default     = "workspacergcommercedev9827"
 }
 
 variable "container_apps_environment_name" {
