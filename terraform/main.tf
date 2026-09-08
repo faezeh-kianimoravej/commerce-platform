@@ -77,6 +77,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   resource_group_name           = azurerm_resource_group.commerce.name
   location                      = var.workload_location
   version                       = var.postgres_version
+  zone                          = "2"
   administrator_login           = var.postgres_admin_username
   administrator_password        = var.postgres_admin_password
   sku_name                      = "B_Standard_B1ms"
