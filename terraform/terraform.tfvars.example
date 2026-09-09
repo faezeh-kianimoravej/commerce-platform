@@ -25,6 +25,12 @@ prometheus_scrape_targets = {
     job_name     = "commerce-product-service"
     metrics_path = "/actuator/prometheus"
   }
+
+  order = {
+    service_key  = "order"
+    job_name     = "commerce-order-service"
+    metrics_path = "/actuator/prometheus"
+  }
 }
 
 grafana_container_app_name          = "commerce-grafana-dev"
@@ -58,12 +64,14 @@ services = {
   }
 
   order = {
-    app_name         = "commerce-order-service-dev"
-    image_repository = "commerce-order-service"
-    image_tag        = "dev"
-    target_port      = 8080
-    external_ingress = false
-    database_name    = "order_db"
+    app_name             = "commerce-order-service-dev"
+    image_repository     = "commerce-order-service"
+    image_tag            = "bootstrap"
+    target_port          = 8080
+    external_ingress     = false
+    database_name        = "order_db"
+    liveness_probe_path  = "/actuator/health/liveness"
+    readiness_probe_path = "/actuator/health/readiness"
   }
 
   gateway = {

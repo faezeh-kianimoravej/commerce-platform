@@ -126,6 +126,8 @@ module "container_app_services" {
   image_tag                    = each.value.image_tag
   target_port                  = each.value.target_port
   external_ingress             = each.value.external_ingress
+  liveness_probe_path          = each.value.liveness_probe_path
+  readiness_probe_path         = each.value.readiness_probe_path
   cpu                          = each.value.cpu
   memory                       = each.value.memory
   min_replicas                 = each.value.min_replicas

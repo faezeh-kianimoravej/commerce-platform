@@ -110,9 +110,7 @@ variable "database_passwords" {
 variable "retained_database_names" {
   description = "Logical databases to keep managed while their services are temporarily inactive."
   type        = map(string)
-  default = {
-    order = "order_db"
-  }
+  default     = {}
 }
 
 variable "service_secrets" {
@@ -131,6 +129,8 @@ variable "services" {
     target_port                  = number
     external_ingress             = bool
     database_name                = optional(string)
+    liveness_probe_path          = optional(string)
+    readiness_probe_path         = optional(string)
     cpu                          = optional(number, 0.5)
     memory                       = optional(string, "1Gi")
     min_replicas                 = optional(number, 0)
@@ -147,6 +147,17 @@ variable "services" {
       target_port      = 8080
       external_ingress = true
       database_name    = "product_db"
+    }
+
+    order = {
+      app_name             = "commerce-order-service-dev"
+      image_repository     = "commerce-order-service"
+      image_tag            = "bootstrap"
+      target_port          = 8080
+      external_ingress     = false
+      database_name        = "order_db"
+      liveness_probe_path  = "/actuator/health/liveness"
+      readiness_probe_path = "/actuator/health/readiness"
     }
   }
 }
@@ -180,6 +191,12 @@ variable "prometheus_scrape_targets" {
     product = {
       service_key  = "product"
       job_name     = "commerce-product-service"
+      metrics_path = "/actuator/prometheus"
+    }
+
+    order = {
+      service_key  = "order"
+      job_name     = "commerce-order-service"
       metrics_path = "/actuator/prometheus"
     }
   }

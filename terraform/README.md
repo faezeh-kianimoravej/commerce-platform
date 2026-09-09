@@ -20,11 +20,12 @@ Per-service resources:
 - One Azure Container App per entry in `var.services`
 - One logical PostgreSQL database for each service where `database_name` is not `null`
 
-Current services:
+Current default services:
 
 - `product`: `commerce-product-service-dev`, database `product_db`
 - `order`: `commerce-order-service-dev`, database `order_db`
-- `gateway`: `commerce-api-gateway-dev`, no database
+
+`gateway` is still a future service entry only. Do not add it to the active service map until the API Gateway work is ready.
 
 ## Monitoring
 
@@ -41,10 +42,16 @@ prometheus_scrape_targets = {
     job_name     = "commerce-product-service"
     metrics_path = "/actuator/prometheus"
   }
+
+  order = {
+    service_key  = "order"
+    job_name     = "commerce-order-service"
+    metrics_path = "/actuator/prometheus"
+  }
 }
 ```
 
-To add Order Service or API Gateway later, add the service to `services` and then add one more `prometheus_scrape_targets` entry with its `service_key`, `job_name`, and `metrics_path`.
+To add API Gateway monitoring later, add the gateway service to `services` and then add one more `prometheus_scrape_targets` entry with its `service_key`, `job_name`, and `metrics_path`.
 
 Grafana is managed in the same monitoring file as a separate shared Container App with external ingress enabled for development access. It uses the official `grafana/grafana` image.
 
@@ -58,13 +65,23 @@ $env:TF_VAR_grafana_admin_password = "<grafana-admin-password>"
 
 ## Logging
 
-Azure Container Apps application logs are centralized through the shared Container Apps Environment. The environment is connected to the Log Analytics Workspace defined by `azurerm_log_analytics_workspace.container_apps`, so container `stdout` and `stderr` from Product are collected without a separate logging backend.
+Azure Container Apps application logs are centralized through the shared Container Apps Environment. The environment is connected to the Log Analytics Workspace defined by `azurerm_log_analytics_workspace.container_apps`, so container `stdout` and `stderr` from Product and Order are collected without a separate logging backend.
 
-Spring Boot writes SLF4J logs to the container console by default. Azure Container Apps captures those console streams and stores them in Log Analytics. Use the `ContainerAppConsoleLogs_CL` table for application log lines and filter by Product's Container App name:
+Spring Boot writes SLF4J logs to the container console by default. Azure Container Apps captures those console streams and stores them in Log Analytics. Use the `ContainerAppConsoleLogs_CL` table for application log lines and filter by the Container App name:
 
 ```kusto
 ContainerAppConsoleLogs_CL
 | where ContainerAppName_s == "commerce-product-service-dev"
+| project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Replica=ContainerGroupName_g, Container=ContainerName_s, Message=Log_s, Level=LogLevel_s
+| order by Time desc
+| take 100
+```
+
+For Order Service logs:
+
+```kusto
+ContainerAppConsoleLogs_CL
+| where ContainerAppName_s == "commerce-order-service-dev"
 | project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Replica=ContainerGroupName_g, Container=ContainerName_s, Message=Log_s, Level=LogLevel_s
 | order by Time desc
 | take 100
@@ -75,6 +92,21 @@ For Azure CLI queries, use the `log_analytics_workspace_id` Terraform output as 
 ```powershell
 az monitor log-analytics query --workspace <log_analytics_workspace_id> --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'commerce-product-service-dev' | project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Container=ContainerName_s, Message=Log_s, LogLevel_s | order by Time desc | take 100" --out table
 ```
+
+Order query:
+
+```powershell
+az monitor log-analytics query --workspace <log_analytics_workspace_id> --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'commerce-order-service-dev' | project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Container=ContainerName_s, Message=Log_s, LogLevel_s | order by Time desc | take 100" --out table
+```
+
+## Health Probes
+
+The reusable Container App module supports optional HTTP liveness and readiness probes. Order enables them with Spring Boot Actuator endpoints:
+
+- Liveness: `/actuator/health/liveness`
+- Readiness: `/actuator/health/readiness`
+
+Product does not enable probes in the default service map, so its runtime behavior is unchanged.
 
 The dev PostgreSQL setup uses public access and an `AllowAzureServices` firewall rule so Azure-hosted services can connect. For production, prefer private networking with VNet integration, private DNS, and restricted database firewall rules.
 
@@ -113,14 +145,17 @@ services = {
   }
 
   order = {
-    app_name         = "commerce-order-service-dev"
-    image_repository = "commerce-order-service"
-    image_tag        = "dev"
-    target_port      = 8080
-    external_ingress = false
-    database_name    = "order_db"
+    app_name             = "commerce-order-service-dev"
+    image_repository     = "commerce-order-service"
+    image_tag            = "bootstrap"
+    target_port          = 8080
+    external_ingress     = false
+    database_name        = "order_db"
+    liveness_probe_path  = "/actuator/health/liveness"
+    readiness_probe_path = "/actuator/health/readiness"
   }
 
+  # Future example only; do not enable until API Gateway infrastructure is ready.
   gateway = {
     app_name         = "commerce-api-gateway-dev"
     image_repository = "commerce-api-gateway"
@@ -163,10 +198,18 @@ Optional per-service settings:
 - `memory`
 - `min_replicas`
 - `max_replicas`
+- `liveness_probe_path`
+- `readiness_probe_path`
 - `environment_variables`
 - `secret_environment_variables`
 
 Additional Container App secrets can be supplied with `service_secrets`, keyed by service name and secret name. Keep real values out of committed files.
+
+## Image Ownership
+
+Terraform configures the Container App infrastructure and needs an image reference only when creating a service for the first time. Order uses the non-`latest` bootstrap tag `bootstrap` for that initial image reference.
+
+Application deployment remains owned by each service CD workflow. For Order, the service workflow should build the image, push an immutable Git SHA tag to ACR, and run `az containerapp update --image ...`. The reusable Container App module ignores image drift after creation so Terraform does not roll a service back to its bootstrap tag or fight service CD deployments.
 
 ## Configure Variables
 

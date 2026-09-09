@@ -24,18 +24,14 @@ resource "azurerm_container_app" "service" {
     }
   }
 
-  dynamic "ingress" {
-    for_each = var.external_ingress ? [1] : []
+  ingress {
+    external_enabled = var.external_ingress
+    target_port      = var.target_port
+    transport        = "auto"
 
-    content {
-      external_enabled = true
-      target_port      = var.target_port
-      transport        = "auto"
-
-      traffic_weight {
-        latest_revision = true
-        percentage      = 100
-      }
+    traffic_weight {
+      latest_revision = true
+      percentage      = 100
     }
   }
 
@@ -66,6 +62,41 @@ resource "azurerm_container_app" "service" {
           secret_name = env.value
         }
       }
+
+      dynamic "liveness_probe" {
+        for_each = var.liveness_probe_path == null ? [] : [var.liveness_probe_path]
+
+        content {
+          transport               = "HTTP"
+          port                    = var.target_port
+          path                    = liveness_probe.value
+          initial_delay           = 30
+          interval_seconds        = 10
+          timeout                 = 5
+          failure_count_threshold = 3
+        }
+      }
+
+      dynamic "readiness_probe" {
+        for_each = var.readiness_probe_path == null ? [] : [var.readiness_probe_path]
+
+        content {
+          transport               = "HTTP"
+          port                    = var.target_port
+          path                    = readiness_probe.value
+          initial_delay           = 15
+          interval_seconds        = 10
+          timeout                 = 5
+          failure_count_threshold = 3
+          success_count_threshold = 1
+        }
+      }
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image
+    ]
   }
 }

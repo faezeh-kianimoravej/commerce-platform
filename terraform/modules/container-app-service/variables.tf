@@ -39,8 +39,20 @@ variable "target_port" {
 }
 
 variable "external_ingress" {
-  description = "Whether the Container App should expose public ingress."
+  description = "Whether the Container App should expose public ingress. Services still receive internal ingress when false."
   type        = bool
+}
+
+variable "liveness_probe_path" {
+  description = "Optional HTTP liveness probe path for the service container."
+  type        = string
+  default     = null
+}
+
+variable "readiness_probe_path" {
+  description = "Optional HTTP readiness probe path for the service container."
+  type        = string
+  default     = null
 }
 
 variable "cpu" {
