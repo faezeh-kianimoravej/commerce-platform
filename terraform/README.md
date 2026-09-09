@@ -322,7 +322,7 @@ Required GitHub repository secrets:
 - `AZURE_TENANT_ID`
 - `AZURE_SUBSCRIPTION_ID`
 - `TF_VAR_POSTGRES_ADMIN_PASSWORD`
-- `TF_VAR_GRAFANA_ADMIN_PASSWORD`
+- `GRAFANA_ADMIN_PASSWORD`
 
 The Azure identity represented by `AZURE_CLIENT_ID` must have a federated identity credential for this repository and enough Azure RBAC permission to manage the resources in `rg-commerce-dev`.
 

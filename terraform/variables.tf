@@ -219,6 +219,11 @@ variable "grafana_admin_password" {
   description = "Grafana administrator password. Supply via TF_VAR_grafana_admin_password or a secure CI secret."
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = length(trimspace(var.grafana_admin_password)) > 0
+    error_message = "Grafana administrator password must not be empty."
+  }
 }
 
 variable "grafana_prometheus_datasource_name" {
