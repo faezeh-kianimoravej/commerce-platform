@@ -10,6 +10,7 @@ Shared resources:
 - Azure Container Registry: `acrcommerceplatformdev`
 - Log Analytics Workspace for Container Apps
 - Shared Azure Container Apps Environment
+- Shared Prometheus Container App for centralized metrics scraping
 - One user-assigned managed identity for Container Apps to pull from ACR
 - `AcrPull` role assignment scoped only to the ACR
 - One Azure Database for PostgreSQL Flexible Server
@@ -24,6 +25,26 @@ Current services:
 - `product`: `commerce-product-service-dev`, database `product_db`
 - `order`: `commerce-order-service-dev`, database `order_db`
 - `gateway`: `commerce-api-gateway-dev`, no database
+
+## Monitoring
+
+Prometheus is managed centrally in `monitoring.tf` as one internal-only Azure Container App in the shared Container Apps Environment. It uses the official `prom/prometheus` image.
+
+Prometheus configuration is rendered from `monitoring/prometheus.yml.tftpl`, stored in a Container Apps secret, injected into the container as `PROMETHEUS_CONFIG`, and written to `/tmp/prometheus.yml` before Prometheus starts. Runtime TSDB data uses an `EmptyDir` volume mounted at `/prometheus`.
+
+Scrape jobs are driven by `prometheus_scrape_targets`. Each entry references a key from `services`, and Terraform resolves that service to its Azure Container Apps same-environment service name.
+
+```hcl
+prometheus_scrape_targets = {
+  product = {
+    service_key  = "product"
+    job_name     = "commerce-product-service"
+    metrics_path = "/actuator/prometheus"
+  }
+}
+```
+
+To add Order Service or API Gateway later, add the service to `services` and then add one more `prometheus_scrape_targets` entry with its `service_key`, `job_name`, and `metrics_path`.
 
 The dev PostgreSQL setup uses public access and an `AllowAzureServices` firewall rule so Azure-hosted services can connect. For production, prefer private networking with VNet integration, private DNS, and restricted database firewall rules.
 
@@ -148,6 +169,10 @@ Important variables:
 - `subscription_id`
 - `location`, the existing resource group region
 - `workload_location`, the region for resources inside the resource group
+- `prometheus_container_app_name`
+- `prometheus_image`
+- `prometheus_scrape_interval`
+- `prometheus_scrape_targets`
 - `postgres_server_name`
 - `postgres_admin_username`
 - `postgres_admin_password`

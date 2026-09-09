@@ -35,3 +35,13 @@ output "postgresql_databases" {
   description = "Logical PostgreSQL databases managed by Terraform."
   value       = [for database in azurerm_postgresql_flexible_server_database.service_databases : database.name]
 }
+
+output "prometheus_container_app_name" {
+  description = "Name of the shared Prometheus Container App."
+  value       = azurerm_container_app.prometheus.name
+}
+
+output "prometheus_internal_url" {
+  description = "Internal URL for the shared Prometheus Container App."
+  value       = try("https://${azurerm_container_app.prometheus.ingress[0].fqdn}", null)
+}

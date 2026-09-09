@@ -150,3 +150,49 @@ variable "services" {
     }
   }
 }
+
+variable "prometheus_container_app_name" {
+  description = "Name of the shared Prometheus Container App."
+  type        = string
+  default     = "commerce-prometheus-dev"
+}
+
+variable "prometheus_image" {
+  description = "Official Prometheus container image used for the shared monitoring Container App."
+  type        = string
+  default     = "prom/prometheus:latest"
+}
+
+variable "prometheus_scrape_interval" {
+  description = "Default interval used by Prometheus scrape jobs."
+  type        = string
+  default     = "15s"
+}
+
+variable "prometheus_scrape_targets" {
+  description = "Container App services scraped by Prometheus, keyed by stable monitoring target name."
+  type = map(object({
+    service_key  = string
+    job_name     = string
+    metrics_path = string
+  }))
+  default = {
+    product = {
+      service_key  = "product"
+      job_name     = "commerce-product-service"
+      metrics_path = "/actuator/prometheus"
+    }
+  }
+}
+
+variable "prometheus_cpu" {
+  description = "CPU cores allocated to the Prometheus Container App."
+  type        = number
+  default     = 0.5
+}
+
+variable "prometheus_memory" {
+  description = "Memory allocated to the Prometheus Container App."
+  type        = string
+  default     = "1Gi"
+}

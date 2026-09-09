@@ -16,6 +16,17 @@ log_analytics_workspace_name    = "workspacergcommercedev9827"
 container_apps_environment_name = "managedEnvironment-rgcommercedev-a0e2"
 container_apps_identity_name    = "id-commerce-containerapps-acrpull-dev"
 
+prometheus_container_app_name = "commerce-prometheus-dev"
+prometheus_image              = "prom/prometheus:latest"
+prometheus_scrape_interval    = "15s"
+prometheus_scrape_targets = {
+  product = {
+    service_key  = "product"
+    job_name     = "commerce-product-service"
+    metrics_path = "/actuator/prometheus"
+  }
+}
+
 # Set this to the actual existing PostgreSQL Flexible Server name before import/apply.
 postgres_server_name    = "commerce-product-db-dev"
 postgres_version        = "16"
