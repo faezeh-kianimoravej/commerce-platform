@@ -27,6 +27,13 @@ prometheus_scrape_targets = {
   }
 }
 
+grafana_container_app_name          = "commerce-grafana-dev"
+grafana_image                       = "grafana/grafana:latest"
+grafana_admin_user                  = "admin"
+grafana_prometheus_datasource_name  = "Prometheus"
+
+# Supply the Grafana admin password with TF_VAR_grafana_admin_password.
+
 # Set this to the actual existing PostgreSQL Flexible Server name before import/apply.
 postgres_server_name    = "commerce-product-db-dev"
 postgres_version        = "16"

@@ -45,3 +45,13 @@ output "prometheus_internal_url" {
   description = "Internal URL for the shared Prometheus Container App."
   value       = try("https://${azurerm_container_app.prometheus.ingress[0].fqdn}", null)
 }
+
+output "grafana_container_app_name" {
+  description = "Name of the shared Grafana Container App."
+  value       = azurerm_container_app.grafana.name
+}
+
+output "grafana_url" {
+  description = "External URL for the shared Grafana Container App."
+  value       = try("https://${azurerm_container_app.grafana.ingress[0].fqdn}", null)
+}

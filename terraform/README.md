@@ -46,6 +46,16 @@ prometheus_scrape_targets = {
 
 To add Order Service or API Gateway later, add the service to `services` and then add one more `prometheus_scrape_targets` entry with its `service_key`, `job_name`, and `metrics_path`.
 
+Grafana is managed in the same monitoring file as a separate shared Container App with external ingress enabled for development access. It uses the official `grafana/grafana` image.
+
+Grafana's Prometheus datasource is provisioned from `monitoring/grafana-datasources.yml.tftpl`. Terraform renders the datasource URL as `http://commerce-prometheus-dev:9090`, stores the rendered YAML in a Container Apps secret, injects it as `GRAFANA_DATASOURCES_CONFIG`, and writes it under `/tmp/grafana-provisioning/datasources` before Grafana starts. `GF_PATHS_PROVISIONING` points Grafana at that generated provisioning directory.
+
+Set the Grafana admin password with a sensitive Terraform variable:
+
+```powershell
+$env:TF_VAR_grafana_admin_password = "<grafana-admin-password>"
+```
+
 The dev PostgreSQL setup uses public access and an `AllowAzureServices` firewall rule so Azure-hosted services can connect. For production, prefer private networking with VNet integration, private DNS, and restricted database firewall rules.
 
 The existing resource group is in `West Europe`. Resources inside that group can still be deployed to another Azure region; this dev configuration keeps workload resources in `North Europe` via `workload_location`.
@@ -152,6 +162,7 @@ Required secret variables should be supplied via environment variables, CI secre
 
 ```powershell
 $env:TF_VAR_postgres_admin_password = "<postgres-admin-password>"
+$env:TF_VAR_grafana_admin_password = "<grafana-admin-password>"
 ```
 
 Optional separate service database passwords can be supplied as a map:
@@ -173,6 +184,11 @@ Important variables:
 - `prometheus_image`
 - `prometheus_scrape_interval`
 - `prometheus_scrape_targets`
+- `grafana_container_app_name`
+- `grafana_image`
+- `grafana_admin_user`
+- `grafana_admin_password`
+- `grafana_prometheus_datasource_name`
 - `postgres_server_name`
 - `postgres_admin_username`
 - `postgres_admin_password`
@@ -306,6 +322,7 @@ Required GitHub repository secrets:
 - `AZURE_TENANT_ID`
 - `AZURE_SUBSCRIPTION_ID`
 - `TF_VAR_POSTGRES_ADMIN_PASSWORD`
+- `TF_VAR_GRAFANA_ADMIN_PASSWORD`
 
 The Azure identity represented by `AZURE_CLIENT_ID` must have a federated identity credential for this repository and enough Azure RBAC permission to manage the resources in `rg-commerce-dev`.
 

@@ -196,3 +196,45 @@ variable "prometheus_memory" {
   type        = string
   default     = "1Gi"
 }
+
+variable "grafana_container_app_name" {
+  description = "Name of the shared Grafana Container App."
+  type        = string
+  default     = "commerce-grafana-dev"
+}
+
+variable "grafana_image" {
+  description = "Official Grafana container image used for the shared monitoring Container App."
+  type        = string
+  default     = "grafana/grafana:latest"
+}
+
+variable "grafana_admin_user" {
+  description = "Grafana administrator username."
+  type        = string
+  default     = "admin"
+}
+
+variable "grafana_admin_password" {
+  description = "Grafana administrator password. Supply via TF_VAR_grafana_admin_password or a secure CI secret."
+  type        = string
+  sensitive   = true
+}
+
+variable "grafana_prometheus_datasource_name" {
+  description = "Name of the default Prometheus datasource provisioned in Grafana."
+  type        = string
+  default     = "Prometheus"
+}
+
+variable "grafana_cpu" {
+  description = "CPU cores allocated to the Grafana Container App."
+  type        = number
+  default     = 0.5
+}
+
+variable "grafana_memory" {
+  description = "Memory allocated to the Grafana Container App."
+  type        = string
+  default     = "1Gi"
+}
