@@ -8,6 +8,16 @@ output "postgresql_host" {
   value       = azurerm_postgresql_flexible_server.postgres.fqdn
 }
 
+output "log_analytics_workspace_name" {
+  description = "Name of the Log Analytics Workspace used by Azure Container Apps."
+  value       = azurerm_log_analytics_workspace.container_apps.name
+}
+
+output "log_analytics_workspace_id" {
+  description = "Workspace ID used for Log Analytics queries."
+  value       = azurerm_log_analytics_workspace.container_apps.workspace_id
+}
+
 output "product_container_app_url" {
   description = "External URL for the product service Container App."
   value       = try(module.container_app_services["product"].url, null)

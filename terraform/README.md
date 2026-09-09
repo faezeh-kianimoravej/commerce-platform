@@ -56,6 +56,26 @@ Set the Grafana admin password with a sensitive Terraform variable:
 $env:TF_VAR_grafana_admin_password = "<grafana-admin-password>"
 ```
 
+## Logging
+
+Azure Container Apps application logs are centralized through the shared Container Apps Environment. The environment is connected to the Log Analytics Workspace defined by `azurerm_log_analytics_workspace.container_apps`, so container `stdout` and `stderr` from Product are collected without a separate logging backend.
+
+Spring Boot writes SLF4J logs to the container console by default. Azure Container Apps captures those console streams and stores them in Log Analytics. Use the `ContainerAppConsoleLogs_CL` table for application log lines and filter by Product's Container App name:
+
+```kusto
+ContainerAppConsoleLogs_CL
+| where ContainerAppName_s == "commerce-product-service-dev"
+| project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Replica=ContainerGroupName_g, Container=ContainerName_s, Message=Log_s, Level=LogLevel_s
+| order by Time desc
+| take 100
+```
+
+For Azure CLI queries, use the `log_analytics_workspace_id` Terraform output as the workspace ID:
+
+```powershell
+az monitor log-analytics query --workspace <log_analytics_workspace_id> --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'commerce-product-service-dev' | project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Container=ContainerName_s, Message=Log_s, LogLevel_s | order by Time desc | take 100" --out table
+```
+
 The dev PostgreSQL setup uses public access and an `AllowAzureServices` firewall rule so Azure-hosted services can connect. For production, prefer private networking with VNet integration, private DNS, and restricted database firewall rules.
 
 The existing resource group is in `West Europe`. Resources inside that group can still be deployed to another Azure region; this dev configuration keeps workload resources in `North Europe` via `workload_location`.
