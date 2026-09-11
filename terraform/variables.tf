@@ -159,6 +159,20 @@ variable "services" {
       liveness_probe_path  = "/actuator/health/liveness"
       readiness_probe_path = "/actuator/health/readiness"
     }
+
+    gateway = {
+      app_name         = "commerce-api-gateway-dev"
+      image_repository = "commerce-api-gateway"
+      image_tag        = "6f62222e927f57e2c7db40b194e249ba7650a5cf"
+      target_port      = 8080
+      external_ingress = true
+      database_name    = null
+
+      environment_variables = {
+        PRODUCT_SERVICE_URL = "http://commerce-product-service-dev"
+        ORDER_SERVICE_URL   = "http://commerce-order-service-dev"
+      }
+    }
   }
 }
 
