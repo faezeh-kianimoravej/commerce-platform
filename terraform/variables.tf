@@ -158,6 +158,10 @@ variable "services" {
       database_name        = "order_db"
       liveness_probe_path  = "/actuator/health/liveness"
       readiness_probe_path = "/actuator/health/readiness"
+
+      environment_variables = {
+        PRODUCT_SERVICE_URL = "http://commerce-product-service-dev"
+      }
     }
 
     gateway = {
